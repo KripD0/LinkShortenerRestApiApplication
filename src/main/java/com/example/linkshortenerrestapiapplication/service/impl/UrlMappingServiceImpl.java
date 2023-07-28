@@ -26,19 +26,19 @@ public class UrlMappingServiceImpl implements UrlMappingService {
     //TODO Добавить проверку на присутствие уже несокращенной ссылки.
     //TODO Добавить при создании проверку на уникальность ссылки.
 
+    private final static String staticIpAddress = "http://0.0.0.0:8081/";
     private final UrlMappingRepository urlMappingRepository;
     private final UrlMapper urlMapper;
 
     @Override
     public UrlMapping findByShortedUrl(String shortedUrl) {
         return urlMappingRepository.findFirstByShortedUrl(shortedUrl)
-                .orElseThrow(() -> new NotFoundUrlException("Данная ссылка недействительна."));
+                .orElseThrow(() -> new NotFoundUrlException("Сокращенная ссылка " + staticIpAddress + shortedUrl + ": недействительна."));
     }
 
     @Override
     public String shortTheLink(UrlMappingDTO urlMappingDTO) {
         isValidUrl(urlMappingDTO.getUrl());
-        String staticIpAddress = "http://0.0.0.0:8081/";
         UrlMapping urlMapping = urlMapper.convertToUrlMapping(urlMappingDTO);
         String shortedUrl = generateRandomString();
         urlMapping.setShortedUrl(shortedUrl);
@@ -59,7 +59,7 @@ public class UrlMappingServiceImpl implements UrlMappingService {
                 .isEmpty();
     }
 
-    private boolean isValidUrl(String userUrl){
+    private boolean isValidUrl(String userUrl) {
         try {
             URL url = new URL(userUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -67,7 +67,7 @@ public class UrlMappingServiceImpl implements UrlMappingService {
             int responseCode = connection.getResponseCode();
             return responseCode == HttpURLConnection.HTTP_OK;
         } catch (MalformedURLException e) {
-            throw new NotValidUrlException("Ссылка которую вы предоставили недействительна.\nПредоставьте рабочую ссылку");
+            throw new NotValidUrlException("Ссылка " + userUrl + " недействительна.\nПредоставьте рабочую ссылку");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

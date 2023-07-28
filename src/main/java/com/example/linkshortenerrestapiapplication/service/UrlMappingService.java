@@ -6,5 +6,6 @@ import com.example.linkshortenerrestapiapplication.model.UrlMapping;
 public interface UrlMappingService {
 
     UrlMapping findByShortedUrl(String shortedUrl);
-    String  shortTheLink(UrlMappingDTO urlMappingDTO);
+
+    String shortTheLink(UrlMappingDTO urlMappingDTO);
 }

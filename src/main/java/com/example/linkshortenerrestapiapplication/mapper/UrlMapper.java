@@ -1,6 +1,7 @@
 package com.example.linkshortenerrestapiapplication.mapper;
 
 import com.example.linkshortenerrestapiapplication.dto.UrlMappingDTO;
+import com.example.linkshortenerrestapiapplication.dto.UrlUserMappingDTO;
 import com.example.linkshortenerrestapiapplication.model.UrlMapping;
 import org.mapstruct.Mapper;
 
@@ -8,5 +9,10 @@ import org.mapstruct.Mapper;
 public interface UrlMapper {
 
     UrlMapping convertToUrlMapping(UrlMappingDTO urlMappingDTO);
+
     UrlMappingDTO convertToUrlMappingDTO(UrlMapping urlMapping);
+
+    UrlMapping convertToUrlMapping(UrlUserMappingDTO urlUserMappingDTO);
+
+    UrlUserMappingDTO convertToUrlUserMappingDTO(UrlMapping urlMapping);
 }
