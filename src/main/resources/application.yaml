@@ -1,0 +1,20 @@
+#Setup Datasource + JPA
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/link_shorter
+    password: postgres
+    username: postgres
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+#Setup swagger
+springdoc:
+  swagger-ui:
+    path: /swag
+
+#Setup server
+server:
+  port: 8081
