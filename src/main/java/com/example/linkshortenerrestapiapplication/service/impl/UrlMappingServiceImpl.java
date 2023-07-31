@@ -1,8 +1,8 @@
 package com.example.linkshortenerrestapiapplication.service.impl;
 
 import com.example.linkshortenerrestapiapplication.dto.UrlMappingDTO;
+import com.example.linkshortenerrestapiapplication.dto.UrlUserMappingDTO;
 import com.example.linkshortenerrestapiapplication.exception.NotFoundUrlException;
-import com.example.linkshortenerrestapiapplication.exception.NotValidUrlException;
 import com.example.linkshortenerrestapiapplication.mapper.UrlMapper;
 import com.example.linkshortenerrestapiapplication.model.UrlMapping;
 import com.example.linkshortenerrestapiapplication.repository.UrlMappingRepository;
@@ -10,10 +10,6 @@ import com.example.linkshortenerrestapiapplication.service.UrlMappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.SecureRandom;
 import java.sql.Date;
 import java.time.LocalDate;
@@ -24,7 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UrlMappingServiceImpl implements UrlMappingService {
 
-    private final static String staticIpAddress = "http://0.0.0.0:8080/";
+    private final static String staticIpAddress = "http://localhost:8080/";
     private final UrlMappingRepository urlMappingRepository;
     private final UrlMapper urlMapper;
 
@@ -36,7 +32,6 @@ public class UrlMappingServiceImpl implements UrlMappingService {
 
     @Override
     public String shortTheLink(UrlMappingDTO urlMappingDTO) {
-        isValidUrl(urlMappingDTO.getUrl());
         String shortedUrl = isThisUrlAlreadyExists(urlMappingDTO.getUrl());
         UrlMapping urlMapping = urlMapper.convertToUrlMapping(urlMappingDTO);
 
@@ -53,11 +48,28 @@ public class UrlMappingServiceImpl implements UrlMappingService {
         return staticIpAddress + shortedUrl;
     }
 
+    public String createUserUrl(UrlUserMappingDTO urlUserMappingDTO){
+        String shortedUrl = isThisUrlAlreadyExists(urlUserMappingDTO.getUrl());
+        if(shortedUrl == null){
+            shortedUrl = urlUserMappingDTO.getShortedUrl();
+            UrlMapping urlMapping = UrlMapping.builder()
+                    .url(urlUserMappingDTO.getUrl())
+                    .shortedUrl(shortedUrl)
+                    .dateOfCreation(Date.valueOf(LocalDate.now()))
+                    .build();
+            urlMappingRepository.save(urlMapping);
+        }
+        return staticIpAddress + shortedUrl;
+    }
+
     private String generateRandomString() {
         SecureRandom secureRandom = new SecureRandom();
         byte[] randomBytes = new byte[9];
         secureRandom.nextBytes(randomBytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes).substring(0, 9);
+        return Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(randomBytes)
+                .substring(0, 9);
     }
 
     private boolean isUrlUnique(String shortedUrl) {
@@ -67,18 +79,7 @@ public class UrlMappingServiceImpl implements UrlMappingService {
 
     private String isThisUrlAlreadyExists(String url){
         Optional<UrlMapping> shortedUrl = urlMappingRepository.findFirstByUrl(url);
-        return shortedUrl.map(UrlMapping::getShortedUrl).orElse(null);
-    }
-
-    private void isValidUrl(String userUrl) {
-        try {
-            URL url = new URL(userUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("HEAD");
-        } catch (MalformedURLException e) {
-            throw new NotValidUrlException("Ссылка " + userUrl + " недействительна.\nПредоставьте рабочую ссылку");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return shortedUrl.map(UrlMapping::getShortedUrl)
+                .orElse(null);
     }
 }
