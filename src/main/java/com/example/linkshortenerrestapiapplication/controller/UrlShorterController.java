@@ -19,6 +19,7 @@ public class UrlShorterController {
     //TODO Добавить Scheduled метод, который будет вызываться 1 раз в день и будет удалять ссылки которым больше 7 дней.
     // Добавить метод контроллера который будет принимать не только длинную ссылнку, но и то что хочет получить пользователь,
     // проверять на уникальность и если что возвращать json о том что такая ссылка уже существует.
+    // Добавить нормальное описание Swagera, добавить проверку без hhtp в ссылке
 
     private final UrlMappingServiceImpl urlMappingService;
 
@@ -29,7 +30,7 @@ public class UrlShorterController {
     }
 
     @GetMapping("/{shortedUrl}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.FOUND)
     public RedirectView redirectToUrl(@PathVariable String shortedUrl) {
         String originalUrl = urlMappingService.findByShortedUrl(shortedUrl).getUrl();
         RedirectView redirectView = new RedirectView();

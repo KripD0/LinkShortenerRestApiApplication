@@ -8,5 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface UrlMappingRepository extends JpaRepository<UrlMapping, Long> {
+
     Optional<UrlMapping> findFirstByShortedUrl(String shortedUrl);
+    Optional<UrlMapping> findFirstByUrl(String url);
 }

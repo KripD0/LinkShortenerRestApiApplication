@@ -18,15 +18,13 @@ import java.security.SecureRandom;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Base64;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UrlMappingServiceImpl implements UrlMappingService {
 
-    //TODO Добавить проверку на присутствие уже несокращенной ссылки.
-    //TODO Добавить при создании проверку на уникальность ссылки.
-
-    private final static String staticIpAddress = "http://0.0.0.0:8081/";
+    private final static String staticIpAddress = "http://0.0.0.0:8080/";
     private final UrlMappingRepository urlMappingRepository;
     private final UrlMapper urlMapper;
 
@@ -39,8 +37,16 @@ public class UrlMappingServiceImpl implements UrlMappingService {
     @Override
     public String shortTheLink(UrlMappingDTO urlMappingDTO) {
         isValidUrl(urlMappingDTO.getUrl());
+        String shortedUrl = isThisUrlAlreadyExists(urlMappingDTO.getUrl());
         UrlMapping urlMapping = urlMapper.convertToUrlMapping(urlMappingDTO);
-        String shortedUrl = generateRandomString();
+
+        if(shortedUrl == null) {
+            shortedUrl = generateRandomString();
+            while (!isUrlUnique(shortedUrl)){
+                shortedUrl = generateRandomString();
+            }
+        }
+
         urlMapping.setShortedUrl(shortedUrl);
         urlMapping.setDateOfCreation(Date.valueOf(LocalDate.now()));
         urlMappingRepository.save(urlMapping);
@@ -59,13 +65,16 @@ public class UrlMappingServiceImpl implements UrlMappingService {
                 .isEmpty();
     }
 
-    private boolean isValidUrl(String userUrl) {
+    private String isThisUrlAlreadyExists(String url){
+        Optional<UrlMapping> shortedUrl = urlMappingRepository.findFirstByUrl(url);
+        return shortedUrl.map(UrlMapping::getShortedUrl).orElse(null);
+    }
+
+    private void isValidUrl(String userUrl) {
         try {
             URL url = new URL(userUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("HEAD");
-            int responseCode = connection.getResponseCode();
-            return responseCode == HttpURLConnection.HTTP_OK;
         } catch (MalformedURLException e) {
             throw new NotValidUrlException("Ссылка " + userUrl + " недействительна.\nПредоставьте рабочую ссылку");
         } catch (IOException e) {

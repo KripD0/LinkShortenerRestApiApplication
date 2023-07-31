@@ -16,5 +16,3 @@ springdoc:
     path: /swag
 
 #Setup server
-server:
-  port: 8081
