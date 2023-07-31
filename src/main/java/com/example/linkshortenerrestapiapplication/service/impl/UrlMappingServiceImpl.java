@@ -22,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UrlMappingServiceImpl implements UrlMappingService {
 
-    private final static String staticIpAddress = "http://192.168.111.102:8080/";
+    private final static String staticIpAddress = "http://26.143.183.5:8080/";
     private final UrlMappingRepository urlMappingRepository;
     private final UrlMapper urlMapper;
 

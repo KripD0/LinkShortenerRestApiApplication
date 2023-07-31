@@ -6,28 +6,41 @@ import com.example.linkshortenerrestapiapplication.exception.NotFoundUrlExceptio
 import com.example.linkshortenerrestapiapplication.exception.NotValidUrlException;
 import com.example.linkshortenerrestapiapplication.exception.response.UrlErrorResponse;
 import com.example.linkshortenerrestapiapplication.service.impl.UrlMappingServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-
+@Tag(name = "Основной контроллер.",
+        description = """
+        Данный контролер отвечает за сокращение ссылок и
+        "перенаправление на оригинальные.""")
 @CrossOrigin("*")
 @RestController
 @RequiredArgsConstructor
 public class UrlShorterController {
 
-    //TODO Добавить Scheduled метод, который будет вызываться 1 раз в день и будет удалять ссылки которым больше 7 дней.
-    // Добавить нормальное описание Swagera
-
     private final UrlMappingServiceImpl urlMappingService;
 
+    @Operation(summary = "Сокращение ссылки",
+    description = """
+            Этот метод контроллера принимает URL и сокращает его до 9 символов, возвращая его пользователю.
+            """)
+    @PostMapping("/short")
+    @ResponseStatus(HttpStatus.CREATED)
+    public String shortTheUrl(@RequestBody UrlMappingDTO urlMappingDTO) {
+        isValidUrl(urlMappingDTO);
+        return urlMappingService.shortTheLink(urlMappingDTO);
+    }
+
+    @Operation(summary = "Сокращение пользовательской ссылки",
+            description = """
+            Этот метод контроллера принимает URL и сокращенный URL который хочет пользователь,
+             и возвращает сокращенный URL с доменом.
+            """)
     @GetMapping("/{shortedUrl}")
     @ResponseStatus(HttpStatus.FOUND)
     public RedirectView redirectToUrl(@PathVariable String shortedUrl) {
@@ -37,13 +50,11 @@ public class UrlShorterController {
         return redirectView;
     }
 
-    @PostMapping("/short")
-    @ResponseStatus(HttpStatus.CREATED)
-    public String shortTheUrl(@RequestBody UrlMappingDTO urlMappingDTO) {
-        isValidUrl(urlMappingDTO);
-        return urlMappingService.shortTheLink(urlMappingDTO);
-    }
-
+    @Operation(summary = "Перенаправление на оригинальный сайт",
+    description = """
+            Этот метод контроллера принимает на вход сокращенную ссылку с доменом 
+            и перенаправляет пользователя на нужный ему сайт
+            """)
     @PostMapping("/userShort")
     @ResponseStatus(HttpStatus.CREATED)
     public String shortTheUserUrl(@RequestBody UrlUserMappingDTO urlUserMappingDTO){
