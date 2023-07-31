@@ -8,7 +8,9 @@ import com.example.linkshortenerrestapiapplication.model.UrlMapping;
 import com.example.linkshortenerrestapiapplication.repository.UrlMappingRepository;
 import com.example.linkshortenerrestapiapplication.service.UrlMappingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.sql.Date;
@@ -20,9 +22,16 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UrlMappingServiceImpl implements UrlMappingService {
 
-    private final static String staticIpAddress = "http://localhost:8080/";
+    private final static String staticIpAddress = "http://192.168.111.102:8080/";
     private final UrlMappingRepository urlMappingRepository;
     private final UrlMapper urlMapper;
+
+    @Scheduled(cron = "0 0 8 * * *")
+    @Transactional
+    public void deleteUrl(){
+        Date cutoffDate = new Date(System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000);
+        urlMappingRepository.deleteByDateOfCreationBefore(cutoffDate);
+    }
 
     @Override
     public UrlMapping findByShortedUrl(String shortedUrl) {
@@ -48,6 +57,7 @@ public class UrlMappingServiceImpl implements UrlMappingService {
         return staticIpAddress + shortedUrl;
     }
 
+    @Override
     public String createUserUrl(UrlUserMappingDTO urlUserMappingDTO){
         String shortedUrl = isThisUrlAlreadyExists(urlUserMappingDTO.getUrl());
         if(shortedUrl == null){

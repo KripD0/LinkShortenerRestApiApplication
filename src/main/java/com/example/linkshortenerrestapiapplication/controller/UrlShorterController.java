@@ -24,7 +24,7 @@ import java.net.URL;
 public class UrlShorterController {
 
     //TODO Добавить Scheduled метод, который будет вызываться 1 раз в день и будет удалять ссылки которым больше 7 дней.
-    // Добавить нормальное описание Swagera, добавить проверку без hhtp в ссылке
+    // Добавить нормальное описание Swagera
 
     private final UrlMappingServiceImpl urlMappingService;
 
